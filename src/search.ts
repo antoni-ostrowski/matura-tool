@@ -146,22 +146,38 @@ function passesFilters(
   return true;
 }
 
-const KEY_WORDS = new Set([
-  "rok",
-  "year",
-  "zad",
-  "task",
-  "nr",
-  "punkty",
-  "pkt",
-  "sesja",
-  "session",
-  "miesiac",
-  "typ",
-  "kind",
-  "topic",
-  "dzial",
-]);
+/** alias → canonical key. Long forms work bare or with `:`, single-letter forms need `:`. */
+const KEY_ALIASES: Record<string, string> = {
+  rok: "year",
+  year: "year",
+  r: "year",
+  y: "year",
+  zad: "task",
+  task: "task",
+  nr: "task",
+  z: "task",
+  punkty: "points",
+  pkt: "points",
+  pts: "points",
+  p: "points",
+  sesja: "session",
+  session: "session",
+  miesiac: "session",
+  typ: "kind",
+  kind: "kind",
+  topic: "topic",
+  dzial: "topic",
+  solved: "solved",
+  rozwiazane: "solved",
+  flagged: "flagged",
+  flaga: "flagged",
+};
+
+/** aliases that may appear bare (no colon). single-letter aliases are excluded to avoid
+ *  clashing with ordinary Polish words like "z" (= from). */
+const LONG_ALIASES = new Set(
+  Object.keys(KEY_ALIASES).filter((k) => k.length > 1),
+);
 
 export function parseFilters(raw: string): Filters {
   const f: Filters = {
@@ -182,7 +198,8 @@ export function parseFilters(raw: string): Filters {
     const tok = parts[i]!;
     const lower = tok.toLowerCase();
     const colon = lower.indexOf(":");
-    const key = colon >= 0 ? lower.slice(0, colon) : KEY_WORDS.has(lower) ? lower : null;
+    const rawKey = colon >= 0 ? lower.slice(0, colon) : LONG_ALIASES.has(lower) ? lower : null;
+    const key = rawKey ? (KEY_ALIASES[rawKey] ?? null) : null;
     const value = colon >= 0 ? lower.slice(colon + 1) || null : null;
     const consume = () => parts[++i];
 
@@ -191,47 +208,48 @@ export function parseFilters(raw: string): Filters {
     if (["podst", "podstawowa", "podstawowy"].includes(lower)) { f.levels.push("podstawowa"); continue; }
     if (["rozsz", "rozszerzona", "rozszerzony"].includes(lower)) { f.levels.push("rozszerzona"); continue; }
     if (["unsolved", "niesolved", "nierozwiazane"].includes(lower)) { f.solved = false; continue; }
-    if (lower === "solved" || lower === "rozwiazane") { f.solved = true; continue; }
     if (["flagged", "flaga", "zaznaczone"].includes(lower)) { f.flagged = true; continue; }
 
-    if (key === "year" || key === "rok") {
-      const y = Number(value ?? consume());
-      if (y) f.years.push(y);
-      continue;
-    }
-    if (key === "zad" || key === "task" || key === "nr") {
-      const n = Number(value ?? consume());
-      if (n) f.taskNo = n;
-      continue;
-    }
-    if (key === "punkty" || key === "pkt") {
-      const v = value ?? consume();
-      const n = Number(v);
-      if (!Number.isNaN(n)) f.points = n;
-      continue;
-    }
-    if (key === "sesja" || key === "session" || key === "miesiac") {
-      const v = (value ?? consume() ?? "").toLowerCase();
-      if (v) f.sessions.push(v);
-      continue;
-    }
-    if (key === "typ" || key === "kind") {
-      const v = (value ?? consume() ?? "").toLowerCase();
-      if (v) f.kinds.push(v);
-      continue;
-    }
-    if (key === "topic" || key === "dzial") {
-      const v = value ?? consume();
-      if (v) text.push(v);
-      continue;
-    }
-    if (key === "solved" || key === "rozwiazane") {
-      f.solved = value !== "false";
-      continue;
-    }
-    if (key === "flagged") {
-      f.flagged = value !== "false";
-      continue;
+    switch (key) {
+      case "year": {
+        const y = Number(value ?? consume());
+        if (y) f.years.push(y);
+        continue;
+      }
+      case "task": {
+        const n = Number(value ?? consume());
+        if (n) f.taskNo = n;
+        continue;
+      }
+      case "points": {
+        const v = value ?? consume();
+        const n = Number(v);
+        if (!Number.isNaN(n)) f.points = n;
+        continue;
+      }
+      case "session": {
+        const v = (value ?? consume() ?? "").toLowerCase();
+        if (v) f.sessions.push(v);
+        continue;
+      }
+      case "kind": {
+        const v = (value ?? consume() ?? "").toLowerCase();
+        if (v) f.kinds.push(v);
+        continue;
+      }
+      case "topic": {
+        const v = value ?? consume();
+        if (v) text.push(v);
+        continue;
+      }
+      case "solved": {
+        f.solved = value !== "false";
+        continue;
+      }
+      case "flagged": {
+        f.flagged = value !== "false";
+        continue;
+      }
     }
     text.push(tok);
   }

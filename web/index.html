@@ -61,13 +61,17 @@
       </table>
       <h2>Query tokens</h2>
       <table>
-        <tr><td><code>2015</code> / <code>rok:2015</code></td><td>filter year</td></tr>
-        <tr><td><code>maj</code> <code>sierpien</code> <code>probna</code> <code>poprawkowa</code></td><td>session</td></tr>
-        <tr><td><code>zad:26</code></td><td>task number</td></tr>
-        <tr><td><code>punkty:2</code></td><td>points</td></tr>
-        <tr><td><code>unsolved</code> <code>flagged</code></td><td>your progress</td></tr>
+        <tr><td><code>2015</code> · <code>rok:2015</code> · <code>r:2015</code> · <code>y:2015</code></td><td>filter year</td></tr>
+        <tr><td><code>maj</code> <code>sierpien</code> <code>probna</code> <code>poprawkowa</code></td><td>session / kind</td></tr>
+        <tr><td><code>zad:26</code> · <code>z:26</code></td><td>task number</td></tr>
+        <tr><td><code>punkty:2</code> · <code>pkt:2</code> · <code>pts:2</code> · <code>p:2</code></td><td>points</td></tr>
+        <tr><td><code>unsolved</code> <code>solved</code> <code>flagged</code></td><td>your progress</td></tr>
         <tr><td>anything else</td><td>fuzzy text search (diacritics optional)</td></tr>
       </table>
+      <p style="color:var(--dim);font-size:12px;margin:8px 0 0">
+        long forms also work without a colon: <code>rok 2015</code>, <code>zad 26</code>.
+        single-letter forms need the colon, so <code>z</code> stays a normal word.
+      </p>
     </dialog>
 
     <script src="/vendor/katex/katex.min.js"></script>

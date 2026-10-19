@@ -25,6 +25,25 @@ describe("parseFilters", () => {
     expect(f.text).toBe("funkcja");
   });
 
+  test("long and short key aliases are equivalent", () => {
+    const long = parseFilters("rok:2016 zad:12 punkty:2");
+    const short = parseFilters("r:2016 z:12 pkt:2");
+    expect(short.years).toEqual(long.years);
+    expect(short.taskNo).toEqual(long.taskNo);
+    expect(short.points).toEqual(long.points);
+    expect(parseFilters("y:2016").years).toEqual([2016]);
+    expect(parseFilters("p:3").points).toBe(3);
+    expect(parseFilters("pts:5").points).toBe(5);
+  });
+
+  test("single-letter aliases require a colon (so 'z' stays a word)", () => {
+    const f = parseFilters("z:12");
+    expect(f.taskNo).toBe(12);
+    const g = parseFilters("wykres z funkcji");
+    expect(g.text).toBe("wykres z funkcji");
+    expect(g.taskNo).toBeNull();
+  });
+
   test("progress flags", () => {
     expect(parseFilters("unsolved").solved).toBe(false);
     expect(parseFilters("flagged").flagged).toBe(true);
