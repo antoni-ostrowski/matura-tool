@@ -43,7 +43,7 @@ export function mdToHtml(md) {
   while ((m = re.exec(md))) {
     out += esc(md.slice(last, m.index)).replace(/\n/g, "<br>");
     if (m[1] !== undefined && m[2] !== undefined) {
-      out += `<img class="fig" loading="lazy" src="${esc(m[2])}" alt="${esc(m[1])}">`;
+      out += `<img class="fig" loading="lazy" src="${esc(m[2])}" alt="${esc(m[1])}" title="kliknij, aby powiększyć">`;
     } else if (m[3] !== undefined) {
       out += renderMath(m[3].trim(), true);
     } else if (m[4] !== undefined) {

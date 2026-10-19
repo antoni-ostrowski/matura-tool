@@ -147,4 +147,15 @@ describe("keyboard scrolling of the detail pane", () => {
     key("k");
     expect(detail.scrollTop).toBe(0);
   });
+
+  test("clicking a figure toggles full size, not the answer", () => {
+    const img = document.createElement("img");
+    img.className = "fig";
+    detail.appendChild(img);
+    img.dispatchEvent(new window.Event("click", { bubbles: true }));
+    expect(img.classList.contains("fig-full")).toBe(true);
+    img.dispatchEvent(new window.Event("click", { bubbles: true }));
+    expect(img.classList.contains("fig-full")).toBe(false);
+    img.remove();
+  });
 });

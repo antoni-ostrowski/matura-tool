@@ -169,7 +169,30 @@ ul#list { list-style: none; margin: 0; padding: 6px; }
 .option { display: flex; gap: 10px; align-items: baseline; }
 .option b { color: var(--accent); }
 
-img.fig { max-width: 100%; border-radius: 6px; background: #fff; padding: 6px; margin: 6px 0; }
+img.fig {
+  display: block;
+  width: auto;
+  height: auto;
+  /* cap both axes so a single diagram can't eat the whole viewport,
+     but leave genuinely small images at their natural size */
+  max-width: min(100%, 32rem);
+  max-height: 22rem;
+  margin: 10px 0;
+  border-radius: 6px;
+  background: #fff;
+  padding: 6px;
+  cursor: zoom-in;
+}
+img.fig.fig-full {
+  max-width: 100%;
+  max-height: none;
+  cursor: zoom-out;
+}
+.option img.fig {
+  max-width: min(100%, 20rem);
+  max-height: 12rem;
+  margin: 4px 0;
+}
 
 .hidden { display: none; }
 .reveal-hint {

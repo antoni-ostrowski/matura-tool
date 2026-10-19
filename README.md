@@ -55,6 +55,13 @@ so `z` stays an ordinary word (Polish "from").
 `d`/`u` scroll pane · `g`/`G` top/bottom ·
 `s` solved · `f` flag · `n`/`p` next/prev task in sheet · `o` source · `?` help
 
+### Figures
+
+Diagram PNGs render capped at `512×352 px` (answer-option figures at `320×192`), which lands at
+roughly 60% of natural size for the bulk of them — small diagrams are left alone. **Click any
+figure** to toggle between that preview and full size. Tune the numbers in `web/style.css`
+(`img.fig` / `.option img.fig`).
+
 ## Architecture
 
 ```

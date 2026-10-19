@@ -292,8 +292,13 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-qEl.addEventListener("input", scheduleSearch);
-qEl.addEventListener("keydown", (e) => {
+/* images: click to toggle between the capped preview and full size */
+detailEl.addEventListener("click", (e) => {
+  const img = e.target.closest?.("img.fig");
+  if (img) img.classList.toggle("fig-full");
+});
+
+qEl.addEventListener("input", scheduleSearch);qEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") scheduleSearch();
 });
 $("#help-btn").onclick = () => helpEl.showModal();

@@ -27,6 +27,7 @@ describe("render.js", () => {
     const html = mdToHtml('tekst ![rysunek](/images/a.png) dalej <b>');
     expect(html).toContain('<img class="fig"');
     expect(html).toContain('src="/images/a.png"');
+    expect(html).toContain('title="kliknij, aby powiększyć"');
     expect(html).toContain("&lt;b&gt;");
   });
 
