@@ -8,7 +8,6 @@ without googling, without clicking through pages.
 ```
 2015 maj kula stożek          # year + session + concept
 próbna prawdopodobieństwo     # mock exams only
-rozsz ciąg geometryczny       # future: extended level
 d:stereometria unsolved       # by chapter
 t:nierownosci kwadratowe      # by topic
 zad:26                        # jump to task number
