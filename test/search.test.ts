@@ -34,6 +34,9 @@ describe("parseFilters", () => {
     expect(parseFilters("y:2016").years).toEqual([2016]);
     expect(parseFilters("p:3").points).toBe(3);
     expect(parseFilters("pts:5").points).toBe(5);
+    expect(parseFilters("m:maj").sessions).toEqual(["maj"]);
+    expect(parseFilters("m:probna").sessions).toEqual(["probna"]);
+    expect(parseFilters("k:poprawkowa").kinds).toEqual(["poprawkowa"]);
   });
 
   test("single-letter aliases require a colon (so 'z' stays a word)", () => {

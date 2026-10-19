@@ -40,6 +40,7 @@ Then just start typing. Press `?` for the full keymap.
 | --- | --- |
 | `2015`, `rok:2015`, `r:2015`, `y:2015` | filter by year |
 | `maj` `czerwiec` `sierpien` `listopad` `probna` `poprawkowa` | session / kind |
+| `sesja:maj`, `m:maj`, `typ:probna`, `k:probna` | same, with keys |
 | `zad:26`, `z:26` | task number |
 | `punkty:2`, `pkt:2`, `pts:2`, `p:2` | points |
 | `unsolved` `solved` `flagged` | your progress |
