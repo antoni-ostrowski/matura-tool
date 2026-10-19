@@ -39,6 +39,8 @@ function renderFilters(f) {
   for (const s of f.kinds) pills.push(`<span class="pill">${s}</span>`);
   for (const l of f.levels) pills.push(`<span class="pill">${l}</span>`);
   for (const t of f.topics ?? []) pills.push(`<span class="pill">temat: ${t}</span>`);
+  for (const d of f.dzialy ?? [])
+    pills.push(`<span class="pill">dział: ${state.meta.dzialNames?.[d] ?? d}</span>`);
   if (f.taskNo != null) pills.push(`<span class="pill">zadanie ${f.taskNo}</span>`);
   if (f.points != null) pills.push(`<span class="pill">${f.points} pkt</span>`);
   if (f.solved != null) pills.push(`<span class="pill">${f.solved ? "rozwiązane" : "nierozwiązane"}</span>`);
@@ -309,7 +311,11 @@ $("#help-btn").onclick = () => helpEl.showModal();
 (async function boot() {
   try {
     const facets = await api("/api/facets");
-    state.meta = { sheets: facets.sheets, tasks: facets.tasks };
+    state.meta = {
+      sheets: facets.sheets,
+      tasks: facets.tasks,
+      dzialNames: Object.fromEntries((facets.dzialy ?? []).map((d) => [d.slug, d.name])),
+    };
   } catch {}
   const url = new URL(location.href);
   if (url.searchParams.get("q")) qEl.value = url.searchParams.get("q");

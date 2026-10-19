@@ -41,7 +41,8 @@ Then just start typing. Press `?` for the full keymap.
 | `2015`, `rok:2015`, `r:2015`, `y:2015` | filter by year |
 | `maj` `czerwiec` `sierpien` `listopad` `probna` `poprawkowa` | session / kind |
 | `sesja:maj`, `m:maj`, `typ:probna`, `k:probna` | same, with keys |
-| `topic:kwadratowe`, `dzial:kwadratowe` | only tasks tagged with that topic |
+| `topic:kwadratowe`, `t:kwadratowe` | only tasks tagged with that (site) topic |
+| `dzial:stereometria`, `d:x`, `cke:stereometria` | only tasks in that CKE chapter (see below) |
 | `zad:26`, `z:26` | task number |
 | `punkty:2`, `pkt:2`, `pts:2`, `p:2` | points |
 | `unsolved` `solved` `flagged` | your progress |
@@ -49,6 +50,52 @@ Then just start typing. Press `?` for the full keymap.
 
 Long forms work bare too (`rok 2015`, `zad 26`). Single-letter forms require the colon,
 so `z` stays an ordinary word (Polish "from").
+
+### What you can filter by
+
+**CKE chapters** (`dzial:` / `d:` / `cke:`) — the official 13 syllabus areas, assigned to
+each task by the classifier in `src/cke.ts`. Accept a slug, the roman numeral, or a name
+fragment: `d:x`, `d:stereometria`, `d:wielomian`.
+
+| | chapter | | chapter |
+| --- | --- | --- | --- |
+| `d:i` | Liczby rzeczywiste | `d:viii` | Planimetria |
+| `d:ii` | Wyrażenia algebraiczne | `d:ix` | Geometria analityczna |
+| `d:iii` | Równania i nierówności | `d:x` | Stereometria |
+| `d:iv` | Układy równań | `d:xi` | Kombinatoryka |
+| `d:v` | Funkcje | `d:xii` | Rachunek prawdopodobieństwa i statystyka |
+| `d:vi` | Ciągi | `d:xiii` | Optymalizacja i rachunek różniczkowy |
+| `d:vii` | Trygonometria | | |
+
+**Site topics** (`topic:` / `t:`) — the finer ~48 labels scraped from szaloneliczby's
+collection pages. Coverage is partial (~23% of tasks) and the labels are the site's, not
+CKE's, so prefer `dzial:` for complete coverage. Ask the live list with
+`curl localhost:8787/api/facets | jq -r '.topics[]'`, or search the ones below (diacritics
+optional, use one distinctive word):
+
+```
+LICZBY / ALGEBRA            GEOMETRIA                     FUNKCJE
+  logarytmy                   graniastoslupy                wlasnosci
+  wzory skroconego            punkty                        liniowej
+  pierwiastki                 bryly obrotowe                kwadratowej
+  potegi                      proste                        odczytywanie
+  liczby rzeczywiste          styczna                       wykresy
+  procenty                    podobienstwo                  optymalizacyjne
+  przedzialy                  rownanie okregu               obliczanie
+  blad                        rownanie prostej              wykladnicza
+                              kat                           przeksztalcenia
+ROWNANIA / NIEROWNOSCI                                      symetria
+  nierownosci               TRYGONOMETRIA
+  rownania wymierne           zaleznosci                  CIAGI
+  pozostale rownania          trygonometria                 ciag geometryczny
+  rownania kwadratowe         funkcje trygonometryczne      ciag arytmetyczny
+  uklad rownan                tablic                        ciagi liczbowe
+  rownania liniowe
+  wielomiany                PRAWDOPODOBIENSTWO / STATYSTYKA
+  trzeciego                   prawdopodobienstwo
+                              statystyka
+                              kombinatoryka
+```
 
 ### Keyboard
 
@@ -69,6 +116,7 @@ figure** to toggle between that preview and full size. Tune the numbers in `web/
 src/scrape.ts   sitemap → pages → parse → SQLite (+ mirror images)
 src/parse.ts    HTML → structured tasks (LaTeX preserved, images → markdown)
 src/text.ts     diacritic folding, Levenshtein, tokenizer
+src/cke.ts      CKE-dział classifier (13 syllabus areas) + topic→chapter map
 src/search.ts   in-memory fuzzy index + query-token filter parser
 src/db.ts       SQLite schema (sheets / tasks / progress)
 src/server.ts   Bun.serve: JSON API + static frontend
@@ -111,8 +159,14 @@ curl -X POST localhost:8787/api/reload
   is written as a *source adapter*, so CKE/arkusze.pl PDFs can be added for rozszerzona.
 - **Source is one third-party site.** Answers are as good as that site; every task keeps
   its `source_url` so you can verify.
-- Roadmap: rozszerzona source · topic facets in the UI · `sqlite-vec` semantic search
-  (`stożek wpisany w kulę` ↔ `cone inscribed in a sphere`) · notes per task · export progress.
+- **CKE chapters are inferred, not official.** `src/cke.ts` classifies each task into one
+  of the 13 syllabus areas by reusing the site's fine topic when present, then weighted
+  keyword rules over the question text. Measured: **~96% of tasks get a chapter**, and it
+  agrees with the site's own topic labels **~79%** of the time (neither label is ground
+  truth). Treat `d:` as a strong narrowing filter, not gospel.
+- Roadmap: rozszerzona source · chapter/topic facets in the UI sidebar · `sqlite-vec`
+  semantic search (`stożek wpisany w kulę` ↔ `cone inscribed in a sphere`) · notes per
+  task · export progress.
 
 ## Etiquette
 

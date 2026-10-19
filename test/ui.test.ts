@@ -12,6 +12,7 @@ const emptyFilters = {
   kinds: [],
   levels: [],
   topics: [],
+  dzialy: [],
   taskNo: null,
   points: null,
   solved: null,
@@ -30,6 +31,7 @@ const hit = {
   text: "kula",
   answer: "A",
   topics: [],
+  dzial: null,
   solved: false,
   flagged: false,
   score: 1,
@@ -91,9 +93,9 @@ beforeAll(async () => {
   }
   (globalThis as any).fetch = async (url: string) => {
     const body = url.includes("/api/facets")
-      ? { years: [], sessions: [], topics: [], levels: [], sheets: 1, tasks: 1 }
+      ? { years: [], sessions: [], topics: [], dzialy: [], levels: [], sheets: 1, tasks: 1 }
       : url.includes("/api/task/")
-        ? { task, sheet, neighbors: { prev: null, next: null }, progress: { solved: false, flagged: false, note: "" } }
+        ? { task, sheet, dzial: null, neighbors: { prev: null, next: null }, progress: { solved: false, flagged: false, note: "" } }
         : { query: "", filters: emptyFilters, total: 1, hits: [hit] };
     return new Response(JSON.stringify(body), {
       headers: { "content-type": "application/json" },

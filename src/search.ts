@@ -1,4 +1,5 @@
 import type { LoadedData, SearchHit, Sheet, Task } from "./db.ts";
+import { classifyDzial, resolveDzial, type DzialSlug } from "./cke.ts";
 import { editDistance, fold, stripMath, tokens } from "./text.ts";
 
 export interface Filters {
@@ -7,6 +8,7 @@ export interface Filters {
   kinds: string[];
   levels: string[];
   topics: string[];
+  dzialy: DzialSlug[];
   taskNo: number | null;
   points: number | null;
   solved: boolean | null;
@@ -20,6 +22,7 @@ export interface IndexedTask {
   blob: string;
   indexTokens: string[];
   topicBlob: string;
+  dzial: DzialSlug | null;
 }
 
 const SESSION_WORDS = ["maj", "czerwiec", "sierpien", "listopad", "styczen", "grudzien", "probna", "poprawkowa"];
@@ -45,6 +48,7 @@ export class SearchEngine {
         blob,
         indexTokens: tokens(blob),
         topicBlob: fold(task.topics.join(" ")),
+        dzial: classifyDzial(task.text, task.options.map((o) => o.content), task.topics).dzial,
       };
       this.tasks.push(indexed);
       this.byId.set(task.id, indexed);
@@ -55,6 +59,12 @@ export class SearchEngine {
     const set = new Set<string>();
     for (const t of this.tasks) for (const topic of t.task.topics) set.add(topic);
     return [...set].sort();
+  }
+
+  get dzialCounts(): Map<DzialSlug, number> {
+    const counts = new Map<DzialSlug, number>();
+    for (const t of this.tasks) if (t.dzial) counts.set(t.dzial, (counts.get(t.dzial) ?? 0) + 1);
+    return counts;
   }
 
   get years(): number[] {
@@ -142,6 +152,7 @@ function passesFilters(
   if (f.taskNo !== null && task.task_no !== f.taskNo) return false;
   if (f.points !== null && task.points !== f.points) return false;
   if (f.topics.length && !f.topics.every((t) => item.topicBlob.includes(t))) return false;
+  if (f.dzialy.length && (!item.dzial || !f.dzialy.includes(item.dzial))) return false;
   const p = progress[task.id];
   if (f.solved !== null && !!p?.solved !== f.solved) return false;
   if (f.flagged !== null && !!p?.flagged !== f.flagged) return false;
@@ -170,7 +181,10 @@ const KEY_ALIASES: Record<string, string> = {
   kind: "kind",
   k: "kind",
   topic: "topic",
-  dzial: "topic",
+  t: "topic",
+  dzial: "dzial",
+  cke: "dzial",
+  d: "dzial",
   solved: "solved",
   rozwiazane: "solved",
   flagged: "flagged",
@@ -190,6 +204,7 @@ export function parseFilters(raw: string): Filters {
     kinds: [],
     levels: [],
     topics: [],
+    dzialy: [],
     taskNo: null,
     points: null,
     solved: null,
@@ -245,6 +260,14 @@ export function parseFilters(raw: string): Filters {
       case "topic": {
         const v = value ?? consume();
         if (v) f.topics.push(fold(v));
+        continue;
+      }
+      case "dzial": {
+        const v = value ?? consume();
+        if (v) {
+          const slug = resolveDzial(v);
+          if (slug) f.dzialy.push(slug);
+        }
         continue;
       }
       case "solved": {

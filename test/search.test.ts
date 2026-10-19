@@ -57,7 +57,15 @@ describe("parseFilters", () => {
     const f = parseFilters("topic:kwadratowe");
     expect(f.topics).toEqual(["kwadratowe"]);
     expect(f.text).toBe("");
-    expect(parseFilters("dzial:kwadratowe").topics).toEqual(["kwadratowe"]);
+    expect(parseFilters("t:kwadratowe").topics).toEqual(["kwadratowe"]);
+  });
+
+  test("dzial:/d:/cke: target CKE chapters, accepting slug, numeral or name fragment", () => {
+    expect(parseFilters("dzial:stereometria").dzialy).toEqual(["stereometria"]);
+    expect(parseFilters("d:x").dzialy).toEqual(["stereometria"]);
+    expect(parseFilters("cke:wielomian").dzialy).toEqual(["wyrazenia-algebraiczne"]);
+    expect(parseFilters("t:kwadratowe d:ciagi").topics).toEqual(["kwadratowe"]);
+    expect(parseFilters("t:kwadratowe d:ciagi").dzialy).toEqual(["ciagi"]);
   });
 
   test("levels", () => {
@@ -112,5 +120,28 @@ describe.skipIf(!hasDb)("SearchEngine (integration)", () => {
     const { hits } = engine.search("topic:kwadratowe r:2015");
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.every((h) => h.sheet.year === 2015)).toBe(true);
+  });
+
+  test("dzial: is a hard filter and every hit carries that chapter", () => {
+    const { hits, total } = engine.search("d:stereometria");
+    expect(total).toBeGreaterThan(50);
+    expect(hits.every((h) => engine.byId.get(h.task.id)?.dzial === "stereometria")).toBe(true);
+  });
+
+  test("dzial: accepts numeral and name fragment", () => {
+    const bySlug = engine.search("d:stereometria").total;
+    expect(engine.search("d:x").total).toBe(bySlug);
+    expect(engine.search("d:planimetria").total).toBe(engine.search("d:viii").total);
+  });
+
+  test("dzial: combines with year", () => {
+    const { hits } = engine.search("d:ciagi r:2016");
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => h.sheet.year === 2016)).toBe(true);
+  });
+
+  test("the classifier labels the overwhelming majority of tasks", () => {
+    const classified = engine.tasks.filter((t) => t.dzial).length;
+    expect(classified / engine.tasks.length).toBeGreaterThan(0.9);
   });
 });

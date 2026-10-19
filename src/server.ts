@@ -5,6 +5,7 @@
  *   PORT=9000 bun run serve
  */
 import { getDb, loadAll, setProgress, type LoadedData } from "./db.ts";
+import { CKE_DZIALY } from "./cke.ts";
 import { SearchEngine } from "./search.ts";
 
 const PORT = Number(process.env.PORT ?? "8787");
@@ -28,6 +29,7 @@ function summary(hit: ReturnType<SearchEngine["search"]>["hits"][number]) {
     text: hit.task.text,
     answer: hit.task.answer,
     topics: hit.task.topics,
+    dzial: engine.byId.get(hit.task.id)?.dzial ?? null,
     solved: !!p?.solved,
     flagged: !!p?.flagged,
     score: Number(hit.score.toFixed(3)),
@@ -38,10 +40,18 @@ function summary(hit: ReturnType<SearchEngine["search"]>["hits"][number]) {
 function facets() {
   const byYear = new Map<number, number>();
   for (const s of engine.sheets) byYear.set(s.year, (byYear.get(s.year) ?? 0) + 1);
+  const counts = engine.dzialCounts;
+  const dzialy = CKE_DZIALY.map((d) => ({
+    slug: d.slug,
+    name: `${d.numeral}. ${d.name}`,
+    numeral: d.numeral,
+    tasks: counts.get(d.slug) ?? 0,
+  }));
   return {
     years: engine.years.map((y) => ({ year: y, sheets: byYear.get(y) ?? 0 })),
     sessions: [...new Set(engine.sheets.map((s) => s.session))].sort(),
     topics: engine.topics,
+    dzialy,
     levels: [...new Set(engine.sheets.map((s) => s.level))],
     sheets: engine.sheets.length,
     tasks: engine.tasks.length,
@@ -123,6 +133,7 @@ const server = Bun.serve({
         return json({
           task: item.task,
           sheet: item.sheet,
+          dzial: item.dzial,
           neighbors: neighbors(item),
           progress: { solved: !!pr?.solved, flagged: !!pr?.flagged, note: pr?.note ?? "" },
         });
