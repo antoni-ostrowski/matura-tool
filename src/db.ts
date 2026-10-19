@@ -50,6 +50,10 @@ export function getDb(path = DB_PATH): Database {
   if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
   db = new Database(path);
   db.exec("PRAGMA journal_mode = WAL;");
+  // WAL lets readers and the server run while the scraper writes, but only one writer
+  // at a time: without a busy timeout, a concurrent scrape + progress save fails instantly
+  // with SQLITE_BUSY ("database is locked").
+  db.exec("PRAGMA busy_timeout = 5000;");
   db.exec("PRAGMA foreign_keys = ON;");
   init(db);
   return db;
