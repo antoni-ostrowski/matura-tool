@@ -9,16 +9,12 @@ without googling, without clicking through pages.
 2015 maj kula stożek          # year + session + concept
 próbna prawdopodobieństwo     # mock exams only
 rozsz ciąg geometryczny       # future: extended level
+d:stereometria unsolved       # by chapter
+t:nierownosci kwadratowe      # by topic
 zad:26                        # jump to task number
-punkty:2 unsolved             # your progress
 ```
 
-## Why it works
-
-- **The dataset is tiny and scrapeable.** ~100 sheets → ~3000 tasks. Scrape once, use forever, offline.
-- **Questions and solutions are real LaTeX text**, not images — so they're fully searchable, and only figures need to be mirrored.
-- **Search is fuzzy and diacritic-insensitive**: `prawdopodobienstwo` finds `prawdopodobieństwo`.
-- **Answers are hidden by default** so you attempt first, then reveal.
+Answers are hidden until you ask, so you attempt first.
 
 ## Quickstart
 
@@ -34,44 +30,49 @@ bun run serve             # → http://localhost:8787
 
 Then just start typing. Press `?` for the full keymap.
 
-### Query tokens
+## Searching
+
+Mix plain words with `key:value` tokens — everything is optional and combinable.
+Word matching is fuzzy and ignores Polish diacritics, so `prawdopodobienstwo` finds
+`prawdopodobieństwo` and a single typo still hits.
 
 | token | meaning |
 | --- | --- |
-| `2015`, `rok:2015`, `r:2015`, `y:2015` | filter by year |
-| `maj` `czerwiec` `sierpien` `listopad` `probna` `poprawkowa` | session / kind |
+| `2015`, `rok:2015`, `r:2015` | filter by year |
+| `maj` `sierpien` `listopad` `probna` `poprawkowa` | session / kind |
 | `sesja:maj`, `m:maj`, `typ:probna`, `k:probna` | same, with keys |
-| `topic:kwadratowe`, `t:kwadratowe` | only tasks tagged with that (site) topic |
-| `dzial:stereometria`, `d:x`, `cke:stereometria` | only tasks in that CKE chapter (see below) |
+| `d:stereometria` | only tasks in that CKE chapter (list below) |
+| `t:kwadratowe` | only tasks with that finer topic (list below) |
 | `zad:26`, `z:26` | task number |
-| `punkty:2`, `pkt:2`, `pts:2`, `p:2` | points |
+| `punkty:2`, `pkt:2`, `p:2` | points |
 | `unsolved` `solved` `flagged` | your progress |
-| anything else | fuzzy text search (diacritics optional) |
+| anything else | fuzzy text search |
 
-Long forms work bare too (`rok 2015`, `zad 26`). Single-letter forms require the colon,
+Long forms work bare too (`rok 2015`, `zad 26`). Single-letter keys need the colon,
 so `z` stays an ordinary word (Polish "from").
 
-### What you can filter by
+### Chapters (`d:`)
 
-**CKE chapters** (`dzial:` / `d:` / `cke:`) — the official 13 syllabus areas, assigned to
-each task by the classifier in `src/cke.ts`. Accept a slug, the roman numeral, or a name
-fragment: `d:x`, `d:stereometria`, `d:wielomian`.
+The 13 official CKE syllabus areas. Every task belongs to one:
 
 | | chapter | | chapter |
 | --- | --- | --- | --- |
-| `d:i` | Liczby rzeczywiste | `d:viii` | Planimetria |
-| `d:ii` | Wyrażenia algebraiczne | `d:ix` | Geometria analityczna |
-| `d:iii` | Równania i nierówności | `d:x` | Stereometria |
-| `d:iv` | Układy równań | `d:xi` | Kombinatoryka |
-| `d:v` | Funkcje | `d:xii` | Rachunek prawdopodobieństwa i statystyka |
-| `d:vi` | Ciągi | `d:xiii` | Optymalizacja i rachunek różniczkowy |
-| `d:vii` | Trygonometria | | |
+| `d:liczby` | Liczby rzeczywiste | `d:planimetria` | Planimetria |
+| `d:algebra` | Wyrażenia algebraiczne | `d:analityczna` | Geometria analityczna |
+| `d:nierownosci` | Równania i nierówności | `d:stereometria` | Stereometria |
+| `d:uklady` | Układy równań | `d:kombinatoryka` | Kombinatoryka |
+| `d:funkcje` | Funkcje | `d:prawdopodobienstwo` | Rachunek prawdopodobieństwa i statystyka |
+| `d:ciagi` | Ciągi | `d:optymalizacja` | Optymalizacja i rachunek różniczkowy |
+| `d:trygonometria` | Trygonometria | | |
 
-**Site topics** (`topic:` / `t:`) — the finer ~48 labels scraped from szaloneliczby's
-collection pages. Coverage is partial (~23% of tasks) and the labels are the site's, not
-CKE's, so prefer `dzial:` for complete coverage. Ask the live list with
-`curl localhost:8787/api/facets | jq -r '.topics[]'`, or search the ones below (diacritics
-optional, use one distinctive word):
+Any distinctive fragment of a chapter name works, so `d:stereo`, `d:plan`, or the full
+`d:stereometria` all do the same thing.
+
+### Topics (`t:`)
+
+Finer labels that mirror how the material is usually taught — handy for drilling a single
+skill. They only cover part of the dataset, so use `d:` when you want everything in a
+chapter. Diacritics optional; one distinctive word is enough.
 
 ```
 LICZBY / ALGEBRA            GEOMETRIA                     FUNKCJE
@@ -97,45 +98,15 @@ ROWNANIA / NIEROWNOSCI                                      symetria
                               kombinatoryka
 ```
 
-### Keyboard
+## Keyboard
 
 `/` search · `↑↓`/`jk` move · `↵` open · `space` answer · `e` explanation ·
 `d`/`u` scroll pane · `g`/`G` top/bottom ·
 `s` solved · `f` flag · `n`/`p` next/prev task in sheet · `o` source · `?` help
 
-### Figures
+## Figures
 
-Diagram PNGs render capped at `512×352 px` (answer-option figures at `320×192`), which lands at
-roughly 60% of natural size for the bulk of them — small diagrams are left alone. **Click any
-figure** to toggle between that preview and full size. Tune the numbers in `web/style.css`
-(`img.fig` / `.option img.fig`).
-
-## Architecture
-
-```
-src/scrape.ts   sitemap → pages → parse → SQLite (+ mirror images)
-src/parse.ts    HTML → structured tasks (LaTeX preserved, images → markdown)
-src/text.ts     diacritic folding, Levenshtein, tokenizer
-src/cke.ts      CKE-dział classifier (13 syllabus areas) + topic→chapter map
-src/search.ts   in-memory fuzzy index + query-token filter parser
-src/db.ts       SQLite schema (sheets / tasks / progress)
-src/server.ts   Bun.serve: JSON API + static frontend
-src/cli.ts      terminal search
-web/            vanilla JS frontend + KaTeX
-```
-
-One Bun process, one SQLite file, no external services. ~3000 tasks fit in memory,
-so search is a linear fuzzy scan (single-digit ms) rather than an FTS dance.
-
-### API
-
-```
-GET  /api/search?q=...&limit=60
-GET  /api/task/:id
-POST /api/progress/:id      { solved?, flagged?, note? }
-GET  /api/facets
-POST /api/reload
-```
+Diagrams render at a readable reduced size. **Click any figure** to toggle full size.
 
 ## Deploy on a homelab
 
@@ -143,32 +114,24 @@ POST /api/reload
 docker compose up -d --build
 ```
 
-First boot scrapes into the mounted `matura-data` volume (takes ~40s), then serves.
+First boot scrapes into the mounted `matura-data` volume (~40s), then serves.
 Put Caddy/Traefik in front if you want TLS.
 
 ```bash
-# inside the container
-docker compose exec matura bun run scrape     # refresh data
-docker compose restart                        # pick up changes? use /api/reload instead
+# refresh the data later
+docker compose exec matura bun run scrape
 curl -X POST localhost:8787/api/reload
 ```
 
-## Limitations & roadmap
+## Limitations
 
-- **Only poziom podstawowy.** szaloneliczby.pl has no rozszerzona arkusze. The scraper
-  is written as a *source adapter*, so CKE/arkusze.pl PDFs can be added for rozszerzona.
-- **Source is one third-party site.** Answers are as good as that site; every task keeps
-  its `source_url` so you can verify.
-- **CKE chapters are inferred, not official.** `src/cke.ts` classifies each task into one
-  of the 13 syllabus areas by reusing the site's fine topic when present, then weighted
-  keyword rules over the question text. Measured: **~96% of tasks get a chapter**, and it
-  agrees with the site's own topic labels **~79%** of the time (neither label is ground
-  truth). Treat `d:` as a strong narrowing filter, not gospel.
-- Roadmap: rozszerzona source · chapter/topic facets in the UI sidebar · `sqlite-vec`
-  semantic search (`stożek wpisany w kulę` ↔ `cone inscribed in a sphere`) · notes per
-  task · export progress.
+- **Only poziom podstawowy.** No rozszerzona arkusze on the source site yet.
+- **Answers come from one third-party site**, so verify anything that looks off — every
+  task keeps a link to its source.
+- **Chapters are auto-assigned.** A rare ambiguous task may sit in the wrong chapter;
+  `d:` is a strong filter, not a guarantee.
 
 ## Etiquette
 
-Scraper is polite (throttled, ~4 concurrent, identifies itself) and caches everything
-locally. Personal study use only — don't republish the content.
+Scraper is polite and caches everything locally. Personal study use only — don't
+republish the content.
