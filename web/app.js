@@ -1,4 +1,6 @@
 /* matura-tool frontend — vanilla, keyboard-first */
+import { esc, renderRich, plain, highlight } from "./render.js";
+
 const $ = (s) => document.querySelector(s);
 const qEl = $("#q");
 const listEl = $("#list");
@@ -19,70 +21,6 @@ const state = {
   loadToken: 0,
   meta: { sheets: 0, tasks: 0 },
 };
-
-/* ---------- math / markdown rendering ---------- */
-
-const esc = (s) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-/** KaTeX chokes on bare `\\` outside an environment; wrap display math that uses it. */
-function fixDisplayMath(md) {
-  return md.replace(/\$\$([\s\S]*?)\$\$/g, (whole, body) => {
-    if (!/\\\\/.test(body)) return whole;
-    if (/\\begin\{/.test(body)) return whole;
-    return `$$\\begin{aligned}${body}\\end{aligned}$$`;
-  });
-}
-
-function mdToHtml(md) {
-  md = fixDisplayMath(md);
-  let out = "";
-  let last = 0;
-  const re = /!\[([^\]]*)\]\(([^)]+)\)/g;
-  let m;
-  while ((m = re.exec(md))) {
-    out += esc(md.slice(last, m.index)).replace(/\n/g, "<br>");
-    out += `<img class="fig" loading="lazy" src="${esc(m[2])}" alt="${esc(m[1])}">`;
-    last = re.lastIndex;
-  }
-  out += esc(md.slice(last)).replace(/\n/g, "<br>");
-  return out;
-}
-
-function renderRich(el, md) {
-  el.innerHTML = mdToHtml(md || "");
-  if (window.renderMathInElement) {
-    renderMathInElement(el, {
-      delimiters: [
-        { left: "$$", right: "$$", display: true },
-        { left: String.raw`\(`, right: String.raw`\)`, display: false },
-        { left: String.raw`\[`, right: String.raw`\]`, display: true },
-      ],
-      throwOnError: false,
-      strict: false,
-    });
-  }
-}
-
-/** Readable one-liner for the results list: keep math content, drop delimiters. */
-function plain(text) {
-  return (text || "")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " [rysunek] ")
-    .replace(/\$\$([\s\S]*?)\$\$/g, " $1 ")
-    .replace(/\\\(([\s\S]*?)\\\)/g, " $1 ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function highlight(text, words) {
-  let html = esc(text);
-  for (const w of words) {
-    if (w.length < 2) continue;
-    const safe = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    html = html.replace(new RegExp(`(${safe})`, "gi"), "<mark>$1</mark>");
-  }
-  return html;
-}
 
 /* ---------- api ---------- */
 
@@ -196,7 +134,6 @@ function renderDetail() {
   if (state.showExplain && $("#explain")) renderRich($("#explain"), task.explanation || "(brak)");
   if (task.scoring && $("#scoring")) renderRich($("#scoring"), task.scoring);
 
-  detailEl.querySelector(".hit");
   statusEl.textContent = `zadanie ${task.task_no} · ${sheet.year} ${sheet.session} · ${neighbors.prev ? "n←" : ""}${neighbors.next ? " →p" : ""}`;
 }
 

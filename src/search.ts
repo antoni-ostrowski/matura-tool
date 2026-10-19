@@ -146,6 +146,23 @@ function passesFilters(
   return true;
 }
 
+const KEY_WORDS = new Set([
+  "rok",
+  "year",
+  "zad",
+  "task",
+  "nr",
+  "punkty",
+  "pkt",
+  "sesja",
+  "session",
+  "miesiac",
+  "typ",
+  "kind",
+  "topic",
+  "dzial",
+]);
+
 export function parseFilters(raw: string): Filters {
   const f: Filters = {
     years: [],
@@ -163,10 +180,11 @@ export function parseFilters(raw: string): Filters {
 
   for (let i = 0; i < parts.length; i++) {
     const tok = parts[i]!;
-    const lower = tok.toLowerCase().replace(/^:+/,"");
-    const [key, value] = lower.includes(":") ? lower.split(":") : [null, null];
-
-    const consume = (v: string | null | undefined) => (v && v.length ? v : parts[++i]);
+    const lower = tok.toLowerCase();
+    const colon = lower.indexOf(":");
+    const key = colon >= 0 ? lower.slice(0, colon) : KEY_WORDS.has(lower) ? lower : null;
+    const value = colon >= 0 ? lower.slice(colon + 1) || null : null;
+    const consume = () => parts[++i];
 
     if (/^(19|20)\d{2}$/.test(lower)) { f.years.push(Number(lower)); continue; }
     if (SESSION_WORDS.includes(lower)) { f.sessions.push(lower); continue; }
@@ -177,47 +195,44 @@ export function parseFilters(raw: string): Filters {
     if (["flagged", "flaga", "zaznaczone"].includes(lower)) { f.flagged = true; continue; }
 
     if (key === "year" || key === "rok") {
-      const v = value ?? consume(value);
-      const y = Number(v);
+      const y = Number(value ?? consume());
       if (y) f.years.push(y);
       continue;
     }
     if (key === "zad" || key === "task" || key === "nr") {
-      const n = Number(value ?? consume(value));
+      const n = Number(value ?? consume());
       if (n) f.taskNo = n;
       continue;
     }
     if (key === "punkty" || key === "pkt") {
-      const n = Number(value ?? consume(value));
+      const v = value ?? consume();
+      const n = Number(v);
       if (!Number.isNaN(n)) f.points = n;
       continue;
     }
     if (key === "sesja" || key === "session" || key === "miesiac") {
-      const v = (value ?? consume(value) ?? "").toLowerCase();
+      const v = (value ?? consume() ?? "").toLowerCase();
       if (v) f.sessions.push(v);
       continue;
     }
     if (key === "typ" || key === "kind") {
-      const v = (value ?? consume(value) ?? "").toLowerCase();
+      const v = (value ?? consume() ?? "").toLowerCase();
       if (v) f.kinds.push(v);
       continue;
     }
     if (key === "topic" || key === "dzial") {
-      const v = value ?? consume(value);
+      const v = value ?? consume();
       if (v) text.push(v);
       continue;
     }
     if (key === "solved" || key === "rozwiazane") {
-      f.solved = (value ?? consume(value)) !== "false";
+      f.solved = value !== "false";
       continue;
     }
     if (key === "flagged") {
-      f.flagged = (value ?? consume(value)) !== "false";
+      f.flagged = value !== "false";
       continue;
     }
-    // bare word
-    if (key && value === null) { text.push(tok); continue; }
-    if (key && value !== null) { text.push(value); continue; }
     text.push(tok);
   }
   f.text = text.join(" ");

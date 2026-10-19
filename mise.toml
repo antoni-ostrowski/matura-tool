@@ -17,3 +17,7 @@ run = "bun --watch run src/server.ts"
 [tasks.check]
 description = "Type-check the project"
 run = "bunx tsc --noEmit"
+
+[tasks.test]
+description = "Run unit + integration tests"
+run = "bun test"
