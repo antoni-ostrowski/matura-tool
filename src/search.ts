@@ -6,6 +6,7 @@ export interface Filters {
   sessions: string[];
   kinds: string[];
   levels: string[];
+  topics: string[];
   taskNo: number | null;
   points: number | null;
   solved: boolean | null;
@@ -140,6 +141,7 @@ function passesFilters(
   }
   if (f.taskNo !== null && task.task_no !== f.taskNo) return false;
   if (f.points !== null && task.points !== f.points) return false;
+  if (f.topics.length && !f.topics.every((t) => item.topicBlob.includes(t))) return false;
   const p = progress[task.id];
   if (f.solved !== null && !!p?.solved !== f.solved) return false;
   if (f.flagged !== null && !!p?.flagged !== f.flagged) return false;
@@ -187,6 +189,7 @@ export function parseFilters(raw: string): Filters {
     sessions: [],
     kinds: [],
     levels: [],
+    topics: [],
     taskNo: null,
     points: null,
     solved: null,
@@ -241,7 +244,7 @@ export function parseFilters(raw: string): Filters {
       }
       case "topic": {
         const v = value ?? consume();
-        if (v) text.push(v);
+        if (v) f.topics.push(fold(v));
         continue;
       }
       case "solved": {

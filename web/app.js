@@ -38,6 +38,7 @@ function renderFilters(f) {
   for (const s of f.sessions) pills.push(`<span class="pill">${s}</span>`);
   for (const s of f.kinds) pills.push(`<span class="pill">${s}</span>`);
   for (const l of f.levels) pills.push(`<span class="pill">${l}</span>`);
+  for (const t of f.topics ?? []) pills.push(`<span class="pill">temat: ${t}</span>`);
   if (f.taskNo != null) pills.push(`<span class="pill">zadanie ${f.taskNo}</span>`);
   if (f.points != null) pills.push(`<span class="pill">${f.points} pkt</span>`);
   if (f.solved != null) pills.push(`<span class="pill">${f.solved ? "rozwiązane" : "nierozwiązane"}</span>`);

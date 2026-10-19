@@ -53,6 +53,13 @@ describe("parseFilters", () => {
     expect(parseFilters("solved").solved).toBe(true);
   });
 
+  test("topic is a filter, not free text", () => {
+    const f = parseFilters("topic:kwadratowe");
+    expect(f.topics).toEqual(["kwadratowe"]);
+    expect(f.text).toBe("");
+    expect(parseFilters("dzial:kwadratowe").topics).toEqual(["kwadratowe"]);
+  });
+
   test("levels", () => {
     expect(parseFilters("rozsz").levels).toEqual(["rozszerzona"]);
     expect(parseFilters("podst").levels).toEqual(["podstawowa"]);
@@ -86,5 +93,24 @@ describe.skipIf(!hasDb)("SearchEngine (integration)", () => {
   test("topic matching surfaces related tasks", () => {
     const { hits } = engine.search("nierownosci kwadratowe");
     expect(hits.some((h) => h.task.topics.some((t) => t.includes("kwadratow")))).toBe(true);
+  });
+
+  test("topic: is a hard filter — every hit carries the topic", () => {
+    const { hits, total } = engine.search("topic:kwadratowe");
+    expect(total).toBeGreaterThan(5);
+    expect(hits.every((h) => h.task.topics.some((t) => t.includes("kwadratow")))).toBe(true);
+  });
+
+  test("topic: ignores diacritics", () => {
+    const a = engine.search("topic:nierownosci").total;
+    const b = engine.search("topic:nierówności").total;
+    expect(a).toBeGreaterThan(0);
+    expect(a).toBe(b);
+  });
+
+  test("topic: combines with other filters", () => {
+    const { hits } = engine.search("topic:kwadratowe r:2015");
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => h.sheet.year === 2015)).toBe(true);
   });
 });

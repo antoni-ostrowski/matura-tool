@@ -11,6 +11,7 @@ const emptyFilters = {
   sessions: [],
   kinds: [],
   levels: [],
+  topics: [],
   taskNo: null,
   points: null,
   solved: null,

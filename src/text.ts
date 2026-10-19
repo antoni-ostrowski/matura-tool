@@ -46,12 +46,16 @@ export function stripMath(input: string): string {
     .trim();
 }
 
-/** Stable key for deduping the same task across arkusze and topic pages. */
+/** Stable key for deduping the same task across arkusze and topic pages.
+ *
+ * Must NOT strip math: template questions ("Liczba \(x\) jest równa:") are only
+ * distinguished by their formulas. Image URLs differ between an arkusz page and a
+ * topic page, so they're replaced by a positional marker instead of being compared. */
 export function taskKey(text: string): string {
-  return fold(stripMath(text))
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .slice(0, 160);
+  return fold(text)
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "[img]")
+    .replace(/\s+/g, "")
+    .slice(0, 400);
 }
 
 export function tokens(input: string): string[] {
