@@ -1,0 +1,19 @@
+[tasks.scrape]
+description = "Scrape szaloneliczby.pl into data/matura.db (+ mirror images)"
+run = "bun run src/scrape.ts"
+
+[tasks.scrape-fast]
+description = "Scrape only the first 3 sheets (smoke test)"
+run = "bun run src/scrape.ts --limit 3"
+
+[tasks.serve]
+description = "Run the web app on http://localhost:8787"
+run = "bun run src/server.ts"
+
+[tasks.dev]
+description = "Run the web app with hot reload"
+run = "bun --watch run src/server.ts"
+
+[tasks.check]
+description = "Type-check the project"
+run = "bunx tsc --noEmit"

@@ -1,0 +1,17 @@
+services:
+  matura:
+    build: .
+    container_name: matura-tool
+    ports:
+      - "8787:8787"
+    volumes:
+      - matura-data:/data
+    environment:
+      PORT: "8787"
+      HOST: "0.0.0.0"
+      MATURA_DB: /data/matura.db
+      MATURA_IMAGES: /data/images
+    restart: unless-stopped
+
+volumes:
+  matura-data:

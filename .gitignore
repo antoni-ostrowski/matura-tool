@@ -1,0 +1,12 @@
+# dependencies
+node_modules/
+
+# build artifacts
+dist/
+
+# local data (scraped db + mirrored images)
+data/
+
+# os / editor
+.DS_Store
+*.log

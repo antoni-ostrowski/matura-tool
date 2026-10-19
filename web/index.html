@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Matura Trainer</title>
+    <link rel="stylesheet" href="/vendor/katex/katex.min.css" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">matura<span>·</span>trainer</div>
+      <div class="searchbox">
+        <span class="prompt">›</span>
+        <input
+          id="q"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="2015 maj kula stożek   ·   próbna prawdopodobieństwo   ·   zad:26"
+        />
+        <kbd class="hint">/</kbd>
+      </div>
+      <div class="stats" id="stats"></div>
+      <button class="ghost" id="help-btn" title="help">?</button>
+    </header>
+
+    <div class="filters" id="filters"></div>
+
+    <main class="layout">
+      <section class="results">
+        <ul id="list"></ul>
+        <div class="empty" id="empty">Type to search. Try <code>2018 maj funkcja kwadratowa</code>.</div>
+      </section>
+      <section class="detail" id="detail">
+        <div class="empty">← pick a task with ↑ ↓ and press ↵</div>
+      </section>
+    </main>
+
+    <footer class="statusbar">
+      <span id="status">ready</span>
+      <span class="keys">
+        <kbd>/</kbd>search <kbd>↑↓</kbd>move <kbd>↵</kbd>open <kbd>space</kbd>answer
+        <kbd>e</kbd>explain <kbd>s</kbd>solved <kbd>f</kbd>flag <kbd>n/p</kbd>next/prev
+        <kbd>o</kbd>source <kbd>?</kbd>help
+      </span>
+    </footer>
+
+    <dialog id="help">
+      <h2>Keyboard</h2>
+      <table>
+        <tr><td><kbd>/</kbd></td><td>focus search</td></tr>
+        <tr><td><kbd>↑</kbd><kbd>↓</kbd> / <kbd>j</kbd><kbd>k</kbd></td><td>move selection</td></tr>
+        <tr><td><kbd>↵</kbd></td><td>load selected task</td></tr>
+        <tr><td><kbd>space</kbd></td><td>toggle answer</td></tr>
+        <tr><td><kbd>e</kbd></td><td>toggle explanation</td></tr>
+        <tr><td><kbd>s</kbd> / <kbd>f</kbd></td><td>mark solved / flag</td></tr>
+        <tr><td><kbd>n</kbd> / <kbd>p</kbd></td><td>next / previous task in sheet</td></tr>
+        <tr><td><kbd>o</kbd></td><td>open source page</td></tr>
+        <tr><td><kbd>esc</kbd></td><td>close</td></tr>
+      </table>
+      <h2>Query tokens</h2>
+      <table>
+        <tr><td><code>2015</code> / <code>rok:2015</code></td><td>filter year</td></tr>
+        <tr><td><code>maj</code> <code>sierpien</code> <code>probna</code> <code>poprawkowa</code></td><td>session</td></tr>
+        <tr><td><code>zad:26</code></td><td>task number</td></tr>
+        <tr><td><code>punkty:2</code></td><td>points</td></tr>
+        <tr><td><code>unsolved</code> <code>flagged</code></td><td>your progress</td></tr>
+        <tr><td>anything else</td><td>fuzzy text search (diacritics optional)</td></tr>
+      </table>
+    </dialog>
+
+    <script src="/vendor/katex/katex.min.js"></script>
+    <script src="/vendor/katex/contrib/auto-render.min.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

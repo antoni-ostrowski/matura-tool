@@ -1,0 +1,19 @@
+{
+  "name": "matura-tool",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scrape": "bun run src/scrape.ts",
+    "serve": "bun run src/server.ts",
+    "dev": "bun --watch run src/server.ts",
+    "search": "bun run src/cli.ts"
+  },
+  "dependencies": {
+    "katex": "^0.19.0",
+    "node-html-parser": "^9.0.4"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2"
+  }
+}
