@@ -1,4 +1,4 @@
-# matura-tool
+# (vibed) matura-tool
 
 A self-hosted, keyboard-first trainer for Polish *matura* (poziom podstawowy) maths.
 

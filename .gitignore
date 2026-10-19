@@ -10,3 +10,4 @@ data/
 # os / editor
 .DS_Store
 *.log
+.local.env

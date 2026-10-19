@@ -1,3 +1,6 @@
+[env]
+_.file = ".local.env"
+
 [tasks.scrape]
 description = "Scrape szaloneliczby.pl into data/matura.db (+ mirror images)"
 run = "bun run src/scrape.ts"
