@@ -52,6 +52,7 @@ so `z` stays an ordinary word (Polish "from").
 ### Keyboard
 
 `/` search · `↑↓`/`jk` move · `↵` open · `space` answer · `e` explanation ·
+`d`/`u` scroll pane · `g`/`G` top/bottom ·
 `s` solved · `f` flag · `n`/`p` next/prev task in sheet · `o` source · `?` help
 
 ## Architecture

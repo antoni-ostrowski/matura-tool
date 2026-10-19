@@ -177,6 +177,7 @@ async function loadDetail(id) {
   if (token !== state.loadToken) return;
   state.detail = d;
   renderDetail();
+  detailEl.scrollTop = 0; // new task starts at the top
 }
 
 async function patchProgress(patch) {
@@ -192,6 +193,11 @@ async function patchProgress(patch) {
   if (hit) Object.assign(hit, { solved: next.solved, flagged: next.flagged });
   renderDetail();
   renderList();
+}
+
+function scrollDetail(dir) {
+  const step = Math.round(detailEl.clientHeight * 0.6);
+  detailEl.scrollTop += dir * step;
 }
 
 /* ---------- keyboard ---------- */
@@ -244,6 +250,22 @@ document.addEventListener("keydown", (e) => {
       e.preventDefault();
       state.showAnswer = !state.showAnswer;
       renderDetail();
+      break;
+    case "d":
+      e.preventDefault();
+      scrollDetail(1);
+      break;
+    case "u":
+      e.preventDefault();
+      scrollDetail(-1);
+      break;
+    case "g":
+      e.preventDefault();
+      detailEl.scrollTop = 0;
+      break;
+    case "G":
+      e.preventDefault();
+      detailEl.scrollTop = detailEl.scrollHeight;
       break;
     case "e":
       state.showExplain = !state.showExplain;
